@@ -1,0 +1,27 @@
+.header {
+  background-color: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.inner {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-3) var(--spacing-4);
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.logo {
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.title {
+  font-weight: 700;
+  font-size: 1.125rem;
+  color: var(--color-text);
+}

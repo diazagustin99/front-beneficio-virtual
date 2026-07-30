@@ -1,0 +1,227 @@
+import { useEffect, useState } from 'react'
+import { getPromotion, getPromotionSnapshots } from '../../api/promotions'
+import type { PromotionDetail, PromotionSnapshot } from '../../api/types'
+import { formatPromotionDateRange, formatPromotionHighlight } from '../../utils/promotionFormatting'
+import styles from './PromotionDetailModal.module.css'
+
+interface PromotionDetailModalProps {
+  promotionId: number | null
+  onClose: () => void
+}
+
+function formatSnapshotHighlight(data: PromotionSnapshot['data']): string | null {
+  return formatPromotionHighlight({
+    discount_percentage: data.discount_percentage ?? null,
+    cashback_percentage: data.cashback_percentage ?? null,
+    fixed_amount: data.fixed_amount ?? null,
+  })
+}
+
+export function PromotionDetailModal({ promotionId, onClose }: PromotionDetailModalProps) {
+  const [detail, setDetail] = useState<PromotionDetail | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [snapshots, setSnapshots] = useState<PromotionSnapshot[]>([])
+
+  useEffect(() => {
+    if (promotionId === null) {
+      return
+    }
+
+    let cancelled = false
+    setIsLoading(true)
+    setError(null)
+    setDetail(null)
+    setSnapshots([])
+
+    getPromotion(promotionId)
+      .then((result) => {
+        if (cancelled) {
+          return
+        }
+
+        setDetail(result)
+
+        // Only bother fetching history when there is one — most promotions
+        // never change and stay at version 1.
+        if (result.version > 1) {
+          getPromotionSnapshots(promotionId)
+            .then((result) => {
+              if (!cancelled) {
+                setSnapshots(result)
+              }
+            })
+            .catch(() => {})
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setError('No se pudo cargar el detalle de la promoción.')
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setIsLoading(false)
+        }
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [promotionId])
+
+  useEffect(() => {
+    if (promotionId === null) {
+      return
+    }
+
+    document.body.style.overflow = 'hidden'
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        onClose()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      document.body.style.overflow = ''
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [promotionId, onClose])
+
+  if (promotionId === null) {
+    return null
+  }
+
+  const highlight = detail ? formatPromotionHighlight(detail) : null
+  const dateRange = detail ? formatPromotionDateRange(detail) : null
+  const merchantName = detail?.merchant?.name ?? 'Comercio sin especificar'
+  const logoUrl = detail?.merchant?.logo_url ?? null
+
+  return (
+    <div className={styles.backdrop} onClick={onClose}>
+      <div
+        className={styles.panel}
+        role="dialog"
+        aria-modal="true"
+        aria-label={detail?.title ?? 'Detalle de la promoción'}
+        onClick={(event) => event.stopPropagation()}
+      >
+        <button type="button" className={styles.closeButton} aria-label="Cerrar" onClick={onClose}>
+          ×
+        </button>
+
+        {isLoading && <p className={styles.status}>Cargando detalle...</p>}
+        {!isLoading && error && <p className={styles.status}>{error}</p>}
+
+        {!isLoading && !error && detail && (
+          <div className={styles.content}>
+            <div className={styles.header}>
+              <span className={styles.logoWrapper}>
+                {logoUrl ? (
+                  <img src={logoUrl} alt="" className={styles.logo} />
+                ) : (
+                  <span className={styles.logoFallback} aria-hidden="true">
+                    {merchantName.charAt(0).toUpperCase()}
+                  </span>
+                )}
+              </span>
+              <div>
+                {detail.wallet && <span className={styles.walletBadge}>{detail.wallet.name}</span>}
+                <h2 className={styles.title}>{detail.title}</h2>
+                <p className={styles.merchant}>{merchantName}</p>
+              </div>
+            </div>
+
+            {highlight && <p className={styles.highlight}>{highlight}</p>}
+            {detail.description && <p className={styles.description}>{detail.description}</p>}
+
+            <dl className={styles.details}>
+              {detail.category && (
+                <div className={styles.detailRow}>
+                  <dt>Categoría</dt>
+                  <dd>{detail.category.name}</dd>
+                </div>
+              )}
+              {dateRange && (
+                <div className={styles.detailRow}>
+                  <dt>Vigencia</dt>
+                  <dd>{dateRange}</dd>
+                </div>
+              )}
+              {detail.valid_days.length > 0 && (
+                <div className={styles.detailRow}>
+                  <dt>Días válidos</dt>
+                  <dd>{detail.valid_days.join(', ')}</dd>
+                </div>
+              )}
+              {detail.installments && (
+                <div className={styles.detailRow}>
+                  <dt>Cuotas</dt>
+                  <dd>{detail.installments}</dd>
+                </div>
+              )}
+              {detail.minimum_purchase && (
+                <div className={styles.detailRow}>
+                  <dt>Compra mínima</dt>
+                  <dd>${Number(detail.minimum_purchase).toLocaleString('es-AR')}</dd>
+                </div>
+              )}
+              {detail.reimbursement_cap && (
+                <div className={styles.detailRow}>
+                  <dt>Tope de reintegro</dt>
+                  <dd>${Number(detail.reimbursement_cap).toLocaleString('es-AR')}</dd>
+                </div>
+              )}
+              {detail.payment_methods.length > 0 && (
+                <div className={styles.detailRow}>
+                  <dt>Medios de pago</dt>
+                  <dd>{detail.payment_methods.map((method) => method.name).join(', ')}</dd>
+                </div>
+              )}
+            </dl>
+
+            {detail.terms && (
+              <div className={styles.terms}>
+                <h3>Términos y condiciones</h3>
+                <p>{detail.terms}</p>
+              </div>
+            )}
+
+            {snapshots.length > 0 && (
+              <div className={styles.history}>
+                <h3>Historial de cambios</h3>
+                <ul className={styles.historyList}>
+                  <li className={styles.historyItem}>
+                    <span className={styles.historyVersion}>Versión {detail.version} (actual)</span>
+                    <span className={styles.historyDetail}>
+                      {[formatPromotionHighlight(detail), detail.title].filter(Boolean).join(' · ')}
+                    </span>
+                  </li>
+                  {snapshots.map((snapshot) => (
+                    <li key={snapshot.id} className={styles.historyItem}>
+                      <span className={styles.historyVersion}>
+                        Versión {snapshot.version} · {new Date(snapshot.created_at).toLocaleDateString('es-AR')}
+                      </span>
+                      <span className={styles.historyDetail}>
+                        {[formatSnapshotHighlight(snapshot.data), snapshot.data.title].filter(Boolean).join(' · ')}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {detail.url && (
+              <a className={styles.visitLink} href={detail.url} target="_blank" rel="noreferrer noopener">
+                Ir a la promoción
+              </a>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}

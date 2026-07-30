@@ -1,0 +1,211 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background-color: rgba(26, 21, 35, 0.5);
+}
+
+/* Mobile-first: a bottom sheet that takes up 3/4 of the screen height. */
+.panel {
+  position: relative;
+  width: 100%;
+  height: 75vh;
+  overflow-y: auto;
+  background-color: var(--color-surface);
+  border-radius: var(--radius) var(--radius) 0 0;
+  padding: var(--spacing-6) var(--spacing-4) var(--spacing-4);
+}
+
+.closeButton {
+  position: absolute;
+  top: var(--spacing-2);
+  right: var(--spacing-2);
+  width: 36px;
+  height: 36px;
+  min-height: 36px;
+  border-radius: 999px;
+  background-color: var(--color-bg);
+  color: var(--color-text-muted);
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.status {
+  text-align: center;
+  color: var(--color-text-muted);
+  padding: var(--spacing-6) 0;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  margin-bottom: var(--spacing-3);
+}
+
+.logoWrapper {
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  overflow: hidden;
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.logoFallback {
+  font-weight: 700;
+  font-size: 1.375rem;
+  color: var(--color-text-muted);
+}
+
+.walletBadge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-primary-dark);
+  background-color: var(--color-border);
+  border-radius: 999px;
+  padding: 0.15rem 0.6rem;
+  margin-bottom: var(--spacing-1);
+}
+
+.title {
+  margin: 0;
+  font-size: 1.125rem;
+}
+
+.merchant {
+  margin: var(--spacing-1) 0 0;
+  color: var(--color-text-muted);
+  font-size: 0.9375rem;
+}
+
+.highlight {
+  margin: 0 0 var(--spacing-3);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-success);
+}
+
+.description {
+  margin: 0 0 var(--spacing-4);
+  color: var(--color-text);
+}
+
+.details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  margin: 0 0 var(--spacing-4);
+  padding: var(--spacing-3);
+  background-color: var(--color-bg);
+  border-radius: var(--radius);
+}
+
+.detailRow {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--spacing-3);
+  font-size: 0.9375rem;
+}
+
+.detailRow dt {
+  color: var(--color-text-muted);
+}
+
+.detailRow dd {
+  margin: 0;
+  text-align: right;
+  font-weight: 600;
+}
+
+.terms {
+  margin: 0 0 var(--spacing-4);
+}
+
+.terms h3 {
+  font-size: 0.9375rem;
+  margin: 0 0 var(--spacing-1);
+}
+
+.terms p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  white-space: pre-line;
+}
+
+.history {
+  margin: 0 0 var(--spacing-4);
+}
+
+.history h3 {
+  font-size: 0.9375rem;
+  margin: 0 0 var(--spacing-2);
+}
+
+.historyList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-left: 2px solid var(--color-border);
+}
+
+.historyItem {
+  display: flex;
+  flex-direction: column;
+  padding: 0 0 0 var(--spacing-3);
+}
+
+.historyVersion {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.historyDetail {
+  font-size: 0.875rem;
+}
+
+.visitLink {
+  display: block;
+  text-align: center;
+  min-height: 44px;
+  line-height: 44px;
+  background-color: var(--color-primary);
+  color: white;
+  font-weight: 600;
+  border-radius: var(--radius);
+  text-decoration: none;
+}
+
+/* From tablet up: a centered dialog instead of a bottom sheet, still capped at 3/4 of the viewport. */
+@media (min-width: 768px) {
+  .backdrop {
+    align-items: center;
+  }
+
+  .panel {
+    width: 75vw;
+    max-width: 640px;
+    height: auto;
+    max-height: 75vh;
+    border-radius: var(--radius);
+  }
+}
