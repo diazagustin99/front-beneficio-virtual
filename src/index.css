@@ -56,9 +56,19 @@ input {
   font-size: 1rem;
 }
 
-/* Touch targets stay comfortably tappable on mobile; only grows on desktop. */
+/*
+ * Touch targets stay comfortably tappable on mobile; only grows on desktop.
+ * `border`/`background` are reset here because the browser's own default
+ * button chrome (a beveled outset border) shows through on any button whose
+ * own styles don't explicitly set a border/background — components that do
+ * want a visible border (`.toggle`, `.pagination button`, day picker, etc.)
+ * already declare their own, which overrides this via normal specificity.
+ */
 button {
   min-height: 44px;
+  padding: 0;
+  border: none;
+  background: none;
   cursor: pointer;
 }
 
@@ -66,4 +76,15 @@ h1,
 h2,
 h3 {
   line-height: 1.2;
+}
+
+/*
+ * One deliberate, theme-matching focus ring for every focusable element,
+ * instead of each browser's own default (which varies and doesn't fit the
+ * design — e.g. showing as an odd halo on buttons with no border of their
+ * own). Only shows for keyboard focus, not mouse clicks.
+ */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }

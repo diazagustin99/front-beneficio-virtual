@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { getPromotion, getPromotionSnapshots } from '../../api/promotions'
-import type { PromotionDetail, PromotionSnapshot } from '../../api/types'
+import { getPromotion } from '../../api/promotions'
+import type { PromotionDetail } from '../../api/types'
 import { formatPromotionDateRange, formatPromotionHighlight } from '../../utils/promotionFormatting'
 import styles from './PromotionDetailModal.module.css'
 
@@ -9,19 +9,10 @@ interface PromotionDetailModalProps {
   onClose: () => void
 }
 
-function formatSnapshotHighlight(data: PromotionSnapshot['data']): string | null {
-  return formatPromotionHighlight({
-    discount_percentage: data.discount_percentage ?? null,
-    cashback_percentage: data.cashback_percentage ?? null,
-    fixed_amount: data.fixed_amount ?? null,
-  })
-}
-
 export function PromotionDetailModal({ promotionId, onClose }: PromotionDetailModalProps) {
   const [detail, setDetail] = useState<PromotionDetail | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [snapshots, setSnapshots] = useState<PromotionSnapshot[]>([])
 
   useEffect(() => {
     if (promotionId === null) {
@@ -32,7 +23,6 @@ export function PromotionDetailModal({ promotionId, onClose }: PromotionDetailMo
     setIsLoading(true)
     setError(null)
     setDetail(null)
-    setSnapshots([])
 
     getPromotion(promotionId)
       .then((result) => {
@@ -41,18 +31,6 @@ export function PromotionDetailModal({ promotionId, onClose }: PromotionDetailMo
         }
 
         setDetail(result)
-
-        // Only bother fetching history when there is one — most promotions
-        // never change and stay at version 1.
-        if (result.version > 1) {
-          getPromotionSnapshots(promotionId)
-            .then((result) => {
-              if (!cancelled) {
-                setSnapshots(result)
-              }
-            })
-            .catch(() => {})
-        }
       })
       .catch(() => {
         if (!cancelled) {
@@ -187,30 +165,6 @@ export function PromotionDetailModal({ promotionId, onClose }: PromotionDetailMo
               <div className={styles.terms}>
                 <h3>Términos y condiciones</h3>
                 <p>{detail.terms}</p>
-              </div>
-            )}
-
-            {snapshots.length > 0 && (
-              <div className={styles.history}>
-                <h3>Historial de cambios</h3>
-                <ul className={styles.historyList}>
-                  <li className={styles.historyItem}>
-                    <span className={styles.historyVersion}>Versión {detail.version} (actual)</span>
-                    <span className={styles.historyDetail}>
-                      {[formatPromotionHighlight(detail), detail.title].filter(Boolean).join(' · ')}
-                    </span>
-                  </li>
-                  {snapshots.map((snapshot) => (
-                    <li key={snapshot.id} className={styles.historyItem}>
-                      <span className={styles.historyVersion}>
-                        Versión {snapshot.version} · {new Date(snapshot.created_at).toLocaleDateString('es-AR')}
-                      </span>
-                      <span className={styles.historyDetail}>
-                        {[formatSnapshotHighlight(snapshot.data), snapshot.data.title].filter(Boolean).join(' · ')}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
               </div>
             )}
 

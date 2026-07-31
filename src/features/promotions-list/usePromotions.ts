@@ -2,9 +2,10 @@ import { useEffect, useState } from 'react'
 import { listPromotions, type PaginatedPromotions } from '../../api/promotions'
 
 interface UsePromotionsParams {
-  wallet: string
-  categoryId: number | undefined
-  merchantId: number | undefined
+  walletSlugs: string[]
+  categoryIds: number[]
+  merchantIds: number[]
+  validDays: string[]
   page: number
 }
 
@@ -25,9 +26,10 @@ export function usePromotions(params: UsePromotionsParams): UsePromotionsResult 
     setError(null)
 
     listPromotions({
-      wallet: params.wallet || undefined,
-      promotion_category_id: params.categoryId,
-      merchant_id: params.merchantId,
+      wallet: params.walletSlugs,
+      promotion_category_id: params.categoryIds,
+      merchant_id: params.merchantIds,
+      valid_days: params.validDays,
       page: params.page,
     })
       .then((result) => {
@@ -49,7 +51,7 @@ export function usePromotions(params: UsePromotionsParams): UsePromotionsResult 
     return () => {
       cancelled = true
     }
-  }, [params.wallet, params.categoryId, params.merchantId, params.page])
+  }, [params.walletSlugs, params.categoryIds, params.merchantIds, params.validDays, params.page])
 
   return { data, isLoading, error }
 }

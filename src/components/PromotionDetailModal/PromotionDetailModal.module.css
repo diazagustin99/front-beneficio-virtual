@@ -23,6 +23,9 @@
   position: absolute;
   top: var(--spacing-2);
   right: var(--spacing-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 36px;
   height: 36px;
   min-height: 36px;
@@ -146,41 +149,6 @@
   font-size: 0.875rem;
   color: var(--color-text-muted);
   white-space: pre-line;
-}
-
-.history {
-  margin: 0 0 var(--spacing-4);
-}
-
-.history h3 {
-  font-size: 0.9375rem;
-  margin: 0 0 var(--spacing-2);
-}
-
-.historyList {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-2);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  border-left: 2px solid var(--color-border);
-}
-
-.historyItem {
-  display: flex;
-  flex-direction: column;
-  padding: 0 0 0 var(--spacing-3);
-}
-
-.historyVersion {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--color-text-muted);
-}
-
-.historyDetail {
-  font-size: 0.875rem;
 }
 
 .visitLink {

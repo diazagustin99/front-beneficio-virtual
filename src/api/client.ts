@@ -27,7 +27,15 @@ export class ApiError extends Error {
   }
 }
 
-export type QueryParams = Record<string, string | number | boolean | undefined>
+type QueryValue = string | number | boolean | undefined
+export type QueryParams = Record<string, QueryValue | QueryValue[]>
+
+function serializeValue(value: string | number | boolean): string {
+  // Laravel's `boolean` validation rule only accepts 1/0 (or the actual
+  // booleans true/false) — the literal strings "true"/"false" that a
+  // naive String(value) would produce here fail validation.
+  return typeof value === 'boolean' ? (value ? '1' : '0') : String(value)
+}
 
 async function request<T>(path: string, params?: QueryParams): Promise<T> {
   const url = new URL(`${BASE_URL}${path}`)
@@ -38,11 +46,18 @@ async function request<T>(path: string, params?: QueryParams): Promise<T> {
         continue
       }
 
-      // Laravel's `boolean` validation rule only accepts 1/0 (or the actual
-      // booleans true/false) — the literal strings "true"/"false" that a
-      // naive String(value) would produce here fail validation.
-      const serialized = typeof value === 'boolean' ? (value ? '1' : '0') : String(value)
-      url.searchParams.set(key, serialized)
+      if (Array.isArray(value)) {
+        // Laravel/PHP only parses `key[]=a&key[]=b` into an array — a
+        // repeated bare `key=a&key=b` collapses to the last value.
+        for (const item of value) {
+          if (item !== undefined && item !== '') {
+            url.searchParams.append(`${key}[]`, serializeValue(item))
+          }
+        }
+        continue
+      }
+
+      url.searchParams.set(key, serializeValue(value))
     }
   }
 

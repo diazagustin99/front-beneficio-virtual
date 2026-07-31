@@ -71,28 +71,7 @@ export interface PromotionDetail {
   ends_at: string | null
   terms: string | null
   url: string | null
-  version: number
   is_active: boolean
   payment_methods: PromotionPaymentMethod[]
   locations: PromotionLocation[]
-}
-
-/**
- * `data` is a snapshot of the promotion's tracked fields exactly as they
- * were before the change that produced the next version — see
- * `Promotion::TRACKED_FIELDS` on the backend for the full field set.
- */
-export interface PromotionSnapshot {
-  id: number
-  version: number
-  data: {
-    title?: string
-    discount_percentage?: string | null
-    cashback_percentage?: string | null
-    fixed_amount?: string | null
-    terms?: string | null
-    [key: string]: unknown
-  }
-  scrape_run_id: number
-  created_at: string
 }

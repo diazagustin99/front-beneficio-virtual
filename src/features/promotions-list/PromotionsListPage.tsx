@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { PromotionCard } from '../../components/PromotionCard/PromotionCard'
 import { PromotionDetailModal } from '../../components/PromotionDetailModal/PromotionDetailModal'
 import { EmptyState } from '../../components/EmptyState/EmptyState'
@@ -7,10 +7,11 @@ import { usePromotions } from './usePromotions'
 import styles from './PromotionsListPage.module.css'
 
 const INITIAL_FILTERS: PromotionFiltersValue = {
-  wallet: '',
-  categoryId: undefined,
-  merchantId: undefined,
+  walletSlugs: [],
+  categoryIds: [],
+  selectedMerchants: [],
   merchantSearch: '',
+  validDays: [],
 }
 
 export function PromotionsListPage() {
@@ -18,10 +19,21 @@ export function PromotionsListPage() {
   const [page, setPage] = useState(1)
   const [selectedPromotionId, setSelectedPromotionId] = useState<number | null>(null)
 
+  // `.map()` would otherwise create a brand-new array on every render (this
+  // component re-renders whenever usePromotions's own state changes), which
+  // as a hook dependency looks "changed" every time and re-triggers the
+  // fetch forever. Memoizing keeps the reference stable across renders where
+  // the actual merchant selection didn't change.
+  const merchantIds = useMemo(
+    () => filters.selectedMerchants.map((merchant) => merchant.id),
+    [filters.selectedMerchants],
+  )
+
   const { data, isLoading, error } = usePromotions({
-    wallet: filters.wallet,
-    categoryId: filters.categoryId,
-    merchantId: filters.merchantId,
+    walletSlugs: filters.walletSlugs,
+    categoryIds: filters.categoryIds,
+    merchantIds,
+    validDays: filters.validDays,
     page,
   })
 

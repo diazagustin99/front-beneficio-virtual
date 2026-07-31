@@ -12,8 +12,7 @@
   transition: border-color 0.15s ease;
 }
 
-.card:hover,
-.card:focus-visible {
+.card:hover {
   border-color: var(--color-primary);
 }
 
