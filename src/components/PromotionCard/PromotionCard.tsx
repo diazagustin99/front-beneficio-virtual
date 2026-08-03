@@ -1,6 +1,8 @@
 import type { KeyboardEvent } from 'react'
 import type { PromotionListItem } from '../../api/types'
+import { MerchantAvatar } from '../MerchantAvatar/MerchantAvatar'
 import { formatPromotionDateRange, formatPromotionHighlight } from '../../utils/promotionFormatting'
+import { getWalletBranding } from '../../utils/walletBranding'
 import styles from './PromotionCard.module.css'
 
 interface PromotionCardProps {
@@ -30,33 +32,27 @@ export function PromotionCard({ promotion, onSelect }: PromotionCardProps) {
       onKeyDown={handleKeyDown}
     >
       <div className={styles.topRow}>
-        {promotion.wallet && <span className={styles.walletBadge}>{promotion.wallet.name}</span>}
-        {highlight && <span className={styles.highlight}>{highlight}</span>}
+        {promotion.wallet && (
+          <span
+            className={styles.walletBadge}
+            style={{ backgroundColor: getWalletBranding(promotion.wallet.slug).color }}
+          >
+            {promotion.wallet.name}
+          </span>
+        )}
+        <span className={styles.highlight}>{highlight}</span>
       </div>
       <div className={styles.header}>
-        <span className={styles.logoWrapper}>
-          {logoUrl ? (
-            <img
-              src={logoUrl}
-              alt=""
-              loading="lazy"
-              className={styles.logo}
-              onError={(event) => {
-                event.currentTarget.style.display = 'none'
-              }}
-            />
-          ) : (
-            <span className={styles.logoFallback} aria-hidden="true">
-              {merchantName.charAt(0).toUpperCase()}
-            </span>
-          )}
-        </span>
+        <MerchantAvatar name={merchantName} logoUrl={logoUrl} size={44} />
         <div className={styles.headerText}>
           <h3 className={styles.title}>{promotion.title}</h3>
           <p className={styles.merchant}>{merchantName}</p>
         </div>
       </div>
-      {promotion.description && <p className={styles.description}>{promotion.description}</p>}
+      {/* Always rendered (even blank) so every card reserves the same
+          vertical space regardless of whether this promotion has a
+          description — otherwise cards without one end up shorter. */}
+      <p className={styles.description}>{promotion.description}</p>
       <div className={styles.footer}>
         {promotion.category && <span className={styles.category}>{promotion.category.name}</span>}
         {dateRange && <span className={styles.dates}>{dateRange}</span>}

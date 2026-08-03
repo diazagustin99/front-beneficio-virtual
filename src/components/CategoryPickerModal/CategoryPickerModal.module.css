@@ -1,0 +1,109 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background-color: rgba(26, 21, 35, 0.5);
+}
+
+/* Mobile-first: a bottom sheet capped at 3/4 of the viewport height. */
+.panel {
+  position: relative;
+  width: 100%;
+  max-height: 75vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background-color: var(--color-surface);
+  border-radius: var(--radius) var(--radius) 0 0;
+  padding: var(--spacing-4);
+}
+
+.header {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-3);
+}
+
+.title {
+  margin: 0;
+  font-size: 1.125rem;
+}
+
+.closeButton {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  min-height: unset;
+  border-radius: 999px;
+  background-color: var(--color-bg);
+  color: var(--color-text-muted);
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.searchInput {
+  flex-shrink: 0;
+  width: 100%;
+  min-height: 48px;
+  padding: 0 var(--spacing-4);
+  margin-bottom: var(--spacing-3);
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+}
+
+.list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.option {
+  flex-shrink: 0;
+  min-height: 48px;
+  padding: 0 var(--spacing-3);
+  border-radius: var(--radius);
+  text-align: left;
+  color: var(--color-text);
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.optionSelected {
+  background-color: var(--color-bg);
+  color: var(--color-primary-dark);
+}
+
+.empty {
+  margin: 0;
+  padding: var(--spacing-4);
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+}
+
+/* From tablet up: a centered dialog instead of a bottom sheet. */
+@media (min-width: 768px) {
+  .backdrop {
+    align-items: center;
+  }
+
+  .panel {
+    width: 480px;
+    max-width: 90vw;
+    max-height: 70vh;
+    border-radius: var(--radius);
+  }
+}

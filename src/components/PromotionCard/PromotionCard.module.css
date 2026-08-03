@@ -1,6 +1,11 @@
+/* Fixed height so every carousel card is identical regardless of how much
+   (or little) title/description/footer text a given promotion has — the
+   inner sections below fill it with `flex-shrink: 0` / `flex: 1`. */
 .card {
-  display: block;
+  display: flex;
+  flex-direction: column;
   width: 100%;
+  height: 15rem;
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
@@ -10,6 +15,7 @@
   color: inherit;
   cursor: pointer;
   transition: border-color 0.15s ease;
+  overflow: hidden;
 }
 
 .card:hover {
@@ -17,6 +23,7 @@
 }
 
 .topRow {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -27,8 +34,7 @@
 .walletBadge {
   font-size: 0.75rem;
   font-weight: 600;
-  color: var(--color-primary-dark);
-  background-color: var(--color-border);
+  color: #fff;
   border-radius: 999px;
   padding: 0.15rem 0.6rem;
 }
@@ -40,35 +46,11 @@
 }
 
 .header {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   gap: var(--spacing-3);
   margin-bottom: var(--spacing-3);
-}
-
-.logoWrapper {
-  flex-shrink: 0;
-  width: 44px;
-  height: 44px;
-  border-radius: 10px;
-  overflow: hidden;
-  background-color: var(--color-bg);
-  border: 1px solid var(--color-border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.logo {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-
-.logoFallback {
-  font-weight: 700;
-  font-size: 1.125rem;
-  color: var(--color-text-muted);
 }
 
 .headerText {
@@ -78,6 +60,10 @@
 .title {
   margin: 0 0 var(--spacing-1);
   font-size: 1rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .merchant {
@@ -89,7 +75,12 @@
   text-overflow: ellipsis;
 }
 
+/* `flex: 1` claims whatever space is left after the fixed-height sections
+   around it, so a missing description just leaves that space blank instead
+   of shrinking the card. */
 .description {
+  flex: 1;
+  min-height: 0;
   margin: 0 0 var(--spacing-3);
   font-size: 0.875rem;
   color: var(--color-text-muted);
@@ -100,16 +91,27 @@
 }
 
 .footer {
+  flex-shrink: 0;
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: var(--spacing-2);
   font-size: 0.8125rem;
   color: var(--color-text-muted);
 }
 
 .category {
+  flex-shrink: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   background-color: var(--color-bg);
   border: 1px solid var(--color-border);
   border-radius: 999px;
   padding: 0.1rem 0.5rem;
+}
+
+.dates {
+  flex-shrink: 0;
+  white-space: nowrap;
 }

@@ -8,6 +8,7 @@ export interface PromotionFilters {
   valid_days?: string[]
   search?: string
   page?: number
+  per_page?: number
 }
 
 export interface PaginatedPromotions {
@@ -25,6 +26,7 @@ export async function listPromotions(filters: PromotionFilters): Promise<Paginat
     valid_days: filters.valid_days,
     search: filters.search,
     page: filters.page,
+    per_page: filters.per_page,
     is_active: true,
   })
 
@@ -38,6 +40,17 @@ export async function listPromotions(filters: PromotionFilters): Promise<Paginat
 
 export async function getPromotion(id: number): Promise<PromotionDetail> {
   const response = await apiClient.request<ApiItemEnvelope<PromotionDetail>>(`/promotions/${id}`)
+
+  return response.data
+}
+
+/**
+ * One promotion per active wallet, already picked as "the best deal" by the
+ * backend — a single request instead of fetching every wallet's promotions
+ * and ranking them client-side (what made the welcome screen slow to load).
+ */
+export async function listWelcomeCarousel(): Promise<PromotionListItem[]> {
+  const response = await apiClient.request<ApiListEnvelope<PromotionListItem>>('/welcome-carousel')
 
   return response.data
 }

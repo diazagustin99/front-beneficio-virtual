@@ -29,13 +29,20 @@ body {
   padding: 0;
 }
 
+html {
+  /* Every component size is in `rem`, relative to this — bumping it here
+     scales all text *and* spacing app-wide, since `--spacing-*` above are
+     also `rem`. Mobile screens are the primary target and small text/tap
+     targets are the recurring complaint, so this sits above the 16px
+     browser default. */
+  font-size: 18px;
+}
+
 body {
   font-family: var(--font-sans);
   background-color: var(--color-bg);
   color: var(--color-text);
   -webkit-font-smoothing: antialiased;
-  /* Mobile-first: comfortable reading size on small screens by default. */
-  font-size: 16px;
   line-height: 1.5;
 }
 
@@ -65,7 +72,7 @@ input {
  * already declare their own, which overrides this via normal specificity.
  */
 button {
-  min-height: 44px;
+  min-height: 48px;
   padding: 0;
   border: none;
   background: none;

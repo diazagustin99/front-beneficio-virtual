@@ -10,6 +10,9 @@ export interface Merchant {
   name: string
   slug: string
   logo_url: string | null
+  /** Only present when the request asked for `with_discounts=1`. */
+  promotions_count?: number
+  wallets?: Wallet[]
 }
 
 export interface PromotionCategory {
@@ -32,6 +35,8 @@ export interface PromotionListItem {
   discount_percentage: string | null
   fixed_amount: string | null
   cashback_percentage: string | null
+  installments: number | null
+  valid_days: string[]
   starts_at: string | null
   ends_at: string | null
   is_active: boolean
@@ -50,6 +55,27 @@ export interface PromotionLocation {
   store_name: string | null
   latitude: string | null
   longitude: string | null
+}
+
+export interface AppPreference {
+  token: string
+  email: string | null
+  email_taken: boolean
+  wants_notifications: boolean
+  merchants: Merchant[]
+  wallets: Wallet[]
+}
+
+export interface AppNotificationData {
+  date: string
+  merchants: Array<{ id: number; name: string; promotions_count: number }>
+}
+
+export interface AppNotification {
+  id: string
+  data: AppNotificationData
+  read_at: string | null
+  created_at: string
 }
 
 export interface PromotionDetail {

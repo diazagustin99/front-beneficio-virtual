@@ -30,6 +30,11 @@ export class ApiError extends Error {
 type QueryValue = string | number | boolean | undefined
 export type QueryParams = Record<string, QueryValue | QueryValue[]>
 
+interface RequestOptions {
+  method?: 'GET' | 'POST' | 'PATCH' | 'DELETE'
+  body?: unknown
+}
+
 function serializeValue(value: string | number | boolean): string {
   // Laravel's `boolean` validation rule only accepts 1/0 (or the actual
   // booleans true/false) — the literal strings "true"/"false" that a
@@ -37,7 +42,7 @@ function serializeValue(value: string | number | boolean): string {
   return typeof value === 'boolean' ? (value ? '1' : '0') : String(value)
 }
 
-async function request<T>(path: string, params?: QueryParams): Promise<T> {
+async function request<T>(path: string, params?: QueryParams, options?: RequestOptions): Promise<T> {
   const url = new URL(`${BASE_URL}${path}`)
 
   if (params) {
@@ -65,7 +70,12 @@ async function request<T>(path: string, params?: QueryParams): Promise<T> {
 
   try {
     response = await fetch(url.toString(), {
-      headers: { Accept: 'application/json' },
+      method: options?.method ?? 'GET',
+      headers: {
+        Accept: 'application/json',
+        ...(options?.body !== undefined ? { 'Content-Type': 'application/json' } : {}),
+      },
+      body: options?.body !== undefined ? JSON.stringify(options.body) : undefined,
     })
   } catch {
     throw new ApiError('No se pudo conectar con el servidor.', 0)

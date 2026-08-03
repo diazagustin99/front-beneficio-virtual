@@ -1,0 +1,265 @@
+.page {
+  /* A hard cap, not just a floor — without it, a long list would just grow
+     the whole page taller instead of scrolling inside the picker area,
+     pushing the footer button off-screen instead of keeping it pinned. */
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-bg);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-3) var(--spacing-4);
+  flex-shrink: 0;
+}
+
+.backButton {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  min-height: unset;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: var(--color-text);
+}
+
+.backButton:disabled {
+  visibility: hidden;
+}
+
+.progressTrack {
+  flex: 1;
+  height: 4px;
+  border-radius: 999px;
+  background-color: var(--color-border);
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background-color: var(--color-primary);
+  transition: width 0.2s ease;
+}
+
+.stepLabel {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.content {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  padding: 0 var(--spacing-4) var(--spacing-4);
+}
+
+.title {
+  margin: 0;
+  font-size: 1.25rem;
+  color: var(--color-text);
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+.searchInput {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 var(--spacing-4);
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  color: var(--color-text);
+}
+
+.emptyMessage {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: var(--spacing-4);
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+}
+
+.merchantGrid {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-content: start;
+  gap: var(--spacing-3);
+  padding: var(--spacing-1) var(--spacing-1) var(--spacing-3);
+}
+
+.merchantCell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-1);
+  padding: var(--spacing-2);
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+  min-height: unset;
+  text-align: center;
+}
+
+.merchantCellSelected {
+  background-color: var(--color-bg);
+  border-color: var(--color-primary);
+}
+
+.merchantAvatarWrapper {
+  position: relative;
+}
+
+.checkBadge {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background-color: var(--color-primary);
+  color: #fff;
+  font-size: 0.6875rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--color-surface);
+}
+
+.merchantCellName {
+  font-size: 0.75rem;
+  color: var(--color-text);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.2;
+}
+
+.walletList {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  padding: var(--spacing-1) var(--spacing-1) var(--spacing-3);
+}
+
+.walletRow {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  min-height: 56px;
+  padding: 0 var(--spacing-3);
+  border-radius: var(--radius);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  text-align: left;
+}
+
+.walletRowSelected {
+  background-color: var(--color-bg);
+  border-color: var(--color-primary);
+}
+
+.walletIcon {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.walletName {
+  flex: 1;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.walletToggle {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  border: 2px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  color: #fff;
+}
+
+.walletToggleOn {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.emailArea {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.helperText {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+}
+
+.input {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 var(--spacing-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background-color: var(--color-surface);
+  color: var(--color-text);
+}
+
+.error {
+  margin: 0;
+  color: #c22b2b;
+  font-size: 0.8125rem;
+}
+
+.footer {
+  flex-shrink: 0;
+  padding: var(--spacing-3) var(--spacing-4);
+  padding-bottom: max(var(--spacing-3), env(safe-area-inset-bottom));
+  border-top: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+}
+
+.primaryButton {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 var(--spacing-4);
+  border-radius: 999px;
+  background-color: var(--color-primary);
+  color: #fff;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.primaryButton:disabled {
+  opacity: 0.6;
+}

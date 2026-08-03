@@ -1,10 +1,14 @@
 import { Route, Routes } from 'react-router-dom'
-import { PromotionsListPage } from '../features/promotions-list/PromotionsListPage'
+import { MerchantDetailPage } from '../features/merchant-detail/MerchantDetailPage'
+import { MerchantsListPage } from '../features/merchants-list/MerchantsListPage'
+import { NotificationsPage } from '../features/notifications/NotificationsPage'
 
 export function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<PromotionsListPage />} />
+      <Route path="/" element={<MerchantsListPage />} />
+      <Route path="/merchants/:id" element={<MerchantDetailPage />} />
+      <Route path="/notifications" element={<NotificationsPage />} />
     </Routes>
   )
 }

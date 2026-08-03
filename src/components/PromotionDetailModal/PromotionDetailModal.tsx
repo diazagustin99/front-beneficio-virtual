@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react'
 import { getPromotion } from '../../api/promotions'
 import type { PromotionDetail } from '../../api/types'
+import { usePreference } from '../../context/PreferenceContext'
 import { formatPromotionDateRange, formatPromotionHighlight } from '../../utils/promotionFormatting'
+import { getWalletBranding } from '../../utils/walletBranding'
+import { MerchantAvatar } from '../MerchantAvatar/MerchantAvatar'
 import styles from './PromotionDetailModal.module.css'
 
 interface PromotionDetailModalProps {
@@ -69,6 +72,8 @@ export function PromotionDetailModal({ promotionId, onClose }: PromotionDetailMo
     }
   }, [promotionId, onClose])
 
+  const { preference } = usePreference()
+
   if (promotionId === null) {
     return null
   }
@@ -77,6 +82,9 @@ export function PromotionDetailModal({ promotionId, onClose }: PromotionDetailMo
   const dateRange = detail ? formatPromotionDateRange(detail) : null
   const merchantName = detail?.merchant?.name ?? 'Comercio sin especificar'
   const logoUrl = detail?.merchant?.logo_url ?? null
+  const isFavoriteWallet = Boolean(
+    detail?.wallet && preference.wallets.some((wallet) => wallet.slug === detail.wallet?.slug),
+  )
 
   return (
     <div className={styles.backdrop} onClick={onClose}>
@@ -97,17 +105,17 @@ export function PromotionDetailModal({ promotionId, onClose }: PromotionDetailMo
         {!isLoading && !error && detail && (
           <div className={styles.content}>
             <div className={styles.header}>
-              <span className={styles.logoWrapper}>
-                {logoUrl ? (
-                  <img src={logoUrl} alt="" className={styles.logo} />
-                ) : (
-                  <span className={styles.logoFallback} aria-hidden="true">
-                    {merchantName.charAt(0).toUpperCase()}
+              <MerchantAvatar name={merchantName} logoUrl={logoUrl} size={56} />
+              <div>
+                {detail.wallet && (
+                  <span
+                    className={styles.walletBadge}
+                    style={{ backgroundColor: getWalletBranding(detail.wallet.slug).color }}
+                  >
+                    {detail.wallet.name}
                   </span>
                 )}
-              </span>
-              <div>
-                {detail.wallet && <span className={styles.walletBadge}>{detail.wallet.name}</span>}
+                {isFavoriteWallet && <span className={styles.favoriteBadge}>Tu billetera</span>}
                 <h2 className={styles.title}>{detail.title}</h2>
                 <p className={styles.merchant}>{merchantName}</p>
               </div>

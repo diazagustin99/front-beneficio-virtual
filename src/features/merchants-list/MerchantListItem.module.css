@@ -1,0 +1,51 @@
+.item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  width: 100%;
+  padding: var(--spacing-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background-color: var(--color-surface);
+  text-align: left;
+}
+
+.info {
+  flex: 1;
+  min-width: 0;
+}
+
+.name {
+  margin: 0;
+  font-weight: 600;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.count {
+  margin: 0.125rem 0 var(--spacing-1);
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+}
+
+.walletBadges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-1);
+}
+
+.walletBadge {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: #fff;
+  border-radius: 999px;
+  padding: 0.05rem 0.5rem;
+}
+
+.chevron {
+  flex-shrink: 0;
+  font-size: 1.5rem;
+  color: var(--color-text-muted);
+}
