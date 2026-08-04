@@ -3,17 +3,22 @@ import type { PromotionCategory } from '../../api/types'
 import { CategoryPickerModal } from '../CategoryPickerModal/CategoryPickerModal'
 import styles from './CategoryTabs.module.css'
 
+/** `null` means "Todos", `'leading'` means the leading chip (e.g. "Mis
+ * Preferencias") — all three live in the same mutually-exclusive group. */
+export type CategorySelection = number | 'leading' | null
+
 interface LeadingChip {
   label: string
-  active: boolean
-  onClick: () => void
 }
 
 interface CategoryTabsProps {
   categories: PromotionCategory[]
-  selectedId: number | null
-  onSelect: (id: number | null) => void
-  /** An extra pinned chip before "Todos" — e.g. "Mis Preferencias" on the home screen. Toggles independently of category selection. */
+  selectedId: CategorySelection
+  onSelect: (id: CategorySelection) => void
+  /** An extra pinned chip before "Todos" — e.g. "Mis Preferencias". Selected
+   * via the `'leading'` sentinel, same one-at-a-time behavior as every
+   * other tab: picking it clears "Todos"/the category, and picking any of
+   * those clears it. */
   leadingChip?: LeadingChip
   /** Caps how many real categories show inline before a "+" chip that opens
    * the full searchable list — omit to show every category inline (the
@@ -21,7 +26,6 @@ interface CategoryTabsProps {
   maxVisible?: number
 }
 
-/** `null` selection means "Todos" — a synthetic first tab, not a real category. */
 export function CategoryTabs({ categories, selectedId, onSelect, leadingChip, maxVisible }: CategoryTabsProps) {
   const [isPickerOpen, setIsPickerOpen] = useState(false)
 
@@ -31,7 +35,7 @@ export function CategoryTabs({ categories, selectedId, onSelect, leadingChip, ma
   // ones — pin it too so its active state stays visible instead of looking
   // like nothing is selected.
   const selectedOutsidePinned =
-    capped && selectedId !== null && !pinnedFirst.some((category) => category.id === selectedId)
+    capped && typeof selectedId === 'number' && !pinnedFirst.some((category) => category.id === selectedId)
       ? (categories.find((category) => category.id === selectedId) ?? null)
       : null
   const visibleCategories = selectedOutsidePinned
@@ -45,8 +49,8 @@ export function CategoryTabs({ categories, selectedId, onSelect, leadingChip, ma
         {leadingChip && (
           <button
             type="button"
-            className={`${styles.tab} ${leadingChip.active ? styles.tabActive : ''}`}
-            onClick={leadingChip.onClick}
+            className={`${styles.tab} ${selectedId === 'leading' ? styles.tabActive : ''}`}
+            onClick={() => onSelect('leading')}
           >
             {leadingChip.label}
           </button>
@@ -83,7 +87,7 @@ export function CategoryTabs({ categories, selectedId, onSelect, leadingChip, ma
       {isPickerOpen && (
         <CategoryPickerModal
           categories={categories}
-          selectedId={selectedId}
+          selectedId={typeof selectedId === 'number' ? selectedId : null}
           onSelect={onSelect}
           onClose={() => setIsPickerOpen(false)}
         />

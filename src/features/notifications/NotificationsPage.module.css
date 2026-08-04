@@ -4,6 +4,7 @@
   max-width: 720px;
   margin: 0 auto;
   padding: var(--spacing-4);
+  animation: global(fadeIn) 0.3s ease both;
 }
 
 .title {
@@ -52,6 +53,11 @@
   color: var(--color-primary-dark);
   font-weight: 600;
   font-size: 0.9375rem;
+  transition: background-color 0.15s ease;
+}
+
+.pushToggleButton:hover:not(:disabled) {
+  background-color: var(--color-bg);
 }
 
 .pushToggleButton:disabled {
@@ -81,12 +87,34 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
   background-color: var(--color-surface);
+  animation: global(fadeInUp) 0.3s ease both;
+  transition: border-color 0.15s ease, background-color 0.15s ease, transform 0.15s ease;
 }
 
 .unread {
   border-color: var(--color-primary);
   background-color: var(--color-bg);
   cursor: pointer;
+}
+
+.unread:active {
+  transform: scale(0.98);
+}
+
+.item:nth-child(1) {
+  animation-delay: 0.02s;
+}
+
+.item:nth-child(2) {
+  animation-delay: 0.06s;
+}
+
+.item:nth-child(3) {
+  animation-delay: 0.1s;
+}
+
+.item:nth-child(n + 4) {
+  animation-delay: 0.14s;
 }
 
 .itemTitle {
@@ -108,6 +136,11 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
   background-color: var(--color-surface);
+  transition: border-color 0.15s ease;
+}
+
+.loadMoreButton:hover:not(:disabled) {
+  border-color: var(--color-primary);
 }
 
 .loadMoreButton:disabled {

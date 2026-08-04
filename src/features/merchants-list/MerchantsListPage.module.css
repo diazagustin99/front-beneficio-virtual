@@ -7,6 +7,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-3);
+  animation: global(fadeIn) 0.3s ease both;
 }
 
 .heading {
@@ -22,6 +23,13 @@
   border: 1px solid var(--color-border);
   background-color: var(--color-surface);
   color: var(--color-text);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.searchInput:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(126, 20, 255, 0.12);
+  outline: none;
 }
 
 .banner {
@@ -32,6 +40,7 @@
   border-radius: var(--radius);
   background-color: var(--color-bg);
   border: 1px solid var(--color-border);
+  animation: global(slideDownFade) 0.35s ease both;
 }
 
 .bannerIcon {
@@ -89,6 +98,11 @@
   color: var(--color-text-muted);
   font-size: 1.125rem;
   line-height: 1;
+  transition: background-color 0.15s ease;
+}
+
+.bannerClose:hover {
+  background-color: var(--color-border);
 }
 
 .count {

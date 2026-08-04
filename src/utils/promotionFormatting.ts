@@ -11,20 +11,32 @@ interface DateRangeSource {
 }
 
 /**
- * Always returns something to show — `'GRATIS'` is the fallback for a
- * promotion with no numeric discount/cashback/cuotas at all (a plain
- * "free benefit"), matching the welcome carousel's badges.
+ * `discount_percentage`/`cashback_percentage`/`fixed_amount` arrive as
+ * decimal strings (e.g. `"0.00"`), which are truthy in JS even though they
+ * mean "not applicable" — the backend now stores that case as `null`, but
+ * this still guards against rows scraped before that fix.
  */
-export function formatPromotionHighlight(promotion: HighlightSource): string {
-  if (promotion.discount_percentage) {
+function isPositive(value: string | null): value is string {
+  return value !== null && Number(value) > 0
+}
+
+/**
+ * Returns `null` when the promotion has no discount/cashback/fixed-amount/
+ * cuotas figure at all — every caller must skip rendering the badge in that
+ * case instead of showing a made-up placeholder (a promotion with no
+ * numeric data isn't necessarily free; e.g. MODO's "CSI" — cuotas sin
+ * interés — promos have no discount at all, just an installment plan).
+ */
+export function formatPromotionHighlight(promotion: HighlightSource): string | null {
+  if (isPositive(promotion.discount_percentage)) {
     return `${Number(promotion.discount_percentage)}% OFF`
   }
 
-  if (promotion.cashback_percentage) {
+  if (isPositive(promotion.cashback_percentage)) {
     return `${Number(promotion.cashback_percentage)}% cashback`
   }
 
-  if (promotion.fixed_amount) {
+  if (isPositive(promotion.fixed_amount)) {
     return `$${Number(promotion.fixed_amount).toLocaleString('es-AR')}`
   }
 
@@ -32,7 +44,7 @@ export function formatPromotionHighlight(promotion: HighlightSource): string {
     return `${promotion.installments} cuotas`
   }
 
-  return 'GRATIS'
+  return null
 }
 
 export function formatPromotionDateRange(promotion: DateRangeSource): string | null {

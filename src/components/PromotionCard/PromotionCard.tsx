@@ -40,7 +40,7 @@ export function PromotionCard({ promotion, onSelect }: PromotionCardProps) {
             {promotion.wallet.name}
           </span>
         )}
-        <span className={styles.highlight}>{highlight}</span>
+        {highlight && <span className={styles.highlight}>{highlight}</span>}
       </div>
       <div className={styles.header}>
         <MerchantAvatar name={merchantName} logoUrl={logoUrl} size={44} />

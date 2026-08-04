@@ -4,7 +4,7 @@ import { listPromotionCategories } from '../../api/categories'
 import type { AppPreference, Merchant, PromotionCategory, Wallet } from '../../api/types'
 import { completeOnboarding, savePushSubscription } from '../../api/preferences'
 import { listWallets } from '../../api/wallets'
-import { CategoryTabs } from '../../components/CategoryTabs/CategoryTabs'
+import { CategoryTabs, type CategorySelection } from '../../components/CategoryTabs/CategoryTabs'
 import { MerchantAvatar } from '../../components/MerchantAvatar/MerchantAvatar'
 import { useDebouncedValue } from '../../hooks/useDebouncedValue'
 import { subscribeToPush } from '../../utils/pushSubscription'
@@ -40,7 +40,13 @@ export function OnboardingPage({ onComplete }: OnboardingPageProps) {
   const [emailError, setEmailError] = useState<string | null>(null)
 
   const [categories, setCategories] = useState<PromotionCategory[]>([])
-  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null)
+  // Same mutually-exclusive group as the home screen's CategoryTabs — here
+  // "Mis Preferencias" filters down to the merchants already checked in
+  // this session (there's no saved preference yet during onboarding), so
+  // it starts unselected instead of defaulting on.
+  const [selectedFilter, setSelectedFilter] = useState<CategorySelection>(null)
+  const selectedCategoryId = typeof selectedFilter === 'number' ? selectedFilter : null
+  const onlyPreferred = selectedFilter === 'leading'
 
   const [selectedMerchants, setSelectedMerchants] = useState<Merchant[]>([])
   const [merchantSearch, setMerchantSearch] = useState('')
@@ -72,6 +78,13 @@ export function OnboardingPage({ onComplete }: OnboardingPageProps) {
   // Only merchants with an active discount show up here — following one
   // with nothing to offer right now wouldn't do anything useful.
   useEffect(() => {
+    // "Mis Preferencias" shows the merchants already checked in this
+    // session — no API call needed, they're already in `selectedMerchants`.
+    if (onlyPreferred) {
+      setIsLoadingMerchants(false)
+      return
+    }
+
     let cancelled = false
     setIsLoadingMerchants(true)
 
@@ -102,10 +115,11 @@ export function OnboardingPage({ onComplete }: OnboardingPageProps) {
     return () => {
       cancelled = true
     }
-  }, [debouncedMerchantSearch, selectedCategoryId])
+  }, [debouncedMerchantSearch, selectedCategoryId, onlyPreferred])
 
   function handleLoadMoreMerchants() {
-    if (isFetchingMoreMerchantsRef.current || merchantPage >= merchantTotalPages) {
+    // "Mis Preferencias" is a static local list (no pagination to fetch).
+    if (onlyPreferred || isFetchingMoreMerchantsRef.current || merchantPage >= merchantTotalPages) {
       return
     }
 
@@ -145,7 +159,11 @@ export function OnboardingPage({ onComplete }: OnboardingPageProps) {
   const orphanedSelectedMerchants = selectedMerchants.filter(
     (selected) => !merchantOptions.some((option) => option.id === selected.id),
   )
-  const mergedMerchantOptions = [...orphanedSelectedMerchants, ...merchantOptions]
+  const mergedMerchantOptions = onlyPreferred
+    ? selectedMerchants.filter((merchant) =>
+        merchant.name.toLowerCase().includes(debouncedMerchantSearch.toLowerCase()),
+      )
+    : [...orphanedSelectedMerchants, ...merchantOptions]
 
   const filteredWallets = wallets.filter((wallet) => wallet.name.toLowerCase().includes(walletSearch.toLowerCase()))
 
@@ -260,7 +278,12 @@ export function OnboardingPage({ onComplete }: OnboardingPageProps) {
               value={merchantSearch}
               onChange={(event) => setMerchantSearch(event.target.value)}
             />
-            <CategoryTabs categories={categories} selectedId={selectedCategoryId} onSelect={setSelectedCategoryId} />
+            <CategoryTabs
+              categories={categories}
+              selectedId={selectedFilter}
+              onSelect={setSelectedFilter}
+              leadingChip={{ label: 'Mis Preferencias' }}
+            />
 
             <div className={styles.merchantGrid} onScroll={handleMerchantGridScroll}>
               {mergedMerchantOptions.map((merchant) => {
@@ -286,7 +309,10 @@ export function OnboardingPage({ onComplete }: OnboardingPageProps) {
                 )
               })}
 
-              {!isLoadingMerchants && mergedMerchantOptions.length === 0 && (
+              {!isLoadingMerchants && mergedMerchantOptions.length === 0 && onlyPreferred && (
+                <p className={styles.emptyMessage}>Todavía no elegiste ningún comercio. Tocá uno para agregarlo.</p>
+              )}
+              {!isLoadingMerchants && mergedMerchantOptions.length === 0 && !onlyPreferred && (
                 <p className={styles.emptyMessage}>No se encontraron comercios.</p>
               )}
               {isLoadingMoreMerchants && <p className={styles.emptyMessage}>Cargando más...</p>}

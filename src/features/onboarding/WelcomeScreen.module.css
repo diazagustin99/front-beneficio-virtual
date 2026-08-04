@@ -17,12 +17,14 @@
 
 .logo {
   border-radius: 14px;
+  animation: global(scaleIn) 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .title {
   margin: 0;
   font-size: 1.375rem;
   color: var(--color-text);
+  animation: global(fadeInUp) 0.5s ease 0.08s both;
 }
 
 .subtitle {
@@ -30,6 +32,7 @@
   max-width: 420px;
   color: var(--color-text-muted);
   font-size: 0.9375rem;
+  animation: global(fadeInUp) 0.5s ease 0.16s both;
 }
 
 /* Mobile-first: native horizontal scroll with snapping, no carousel library. */
@@ -54,6 +57,36 @@
   /* Decorative preview, not interactive — PromotionCard is normally
      clickable, but there's no detail modal wired up on this screen. */
   pointer-events: none;
+  /* Opacity-only — the card inside already animates its own fadeInUp
+     (position/scale), this just staggers *when* each one becomes visible
+     so the carousel fans in card by card instead of all at once. */
+  animation: global(fadeIn) 0.4s ease both;
+}
+
+/* Capped at the first 6; the rest share the last delay rather than
+   trailing off for a long time. */
+.slide:nth-child(1) {
+  animation-delay: 0.22s;
+}
+
+.slide:nth-child(2) {
+  animation-delay: 0.28s;
+}
+
+.slide:nth-child(3) {
+  animation-delay: 0.34s;
+}
+
+.slide:nth-child(4) {
+  animation-delay: 0.4s;
+}
+
+.slide:nth-child(5) {
+  animation-delay: 0.46s;
+}
+
+.slide:nth-child(n + 6) {
+  animation-delay: 0.52s;
 }
 
 .dots {
@@ -85,10 +118,17 @@
   color: #fff;
   font-weight: 600;
   font-size: 1rem;
+  animation: global(fadeInUp) 0.5s ease 0.55s both;
+  transition: box-shadow 0.2s ease, transform 0.15s ease;
+}
+
+.ctaButton:hover {
+  box-shadow: 0 10px 24px rgba(126, 20, 255, 0.28);
 }
 
 .disclaimer {
   margin: 0;
   font-size: 0.8125rem;
   color: var(--color-text-muted);
+  animation: global(fadeIn) 0.6s ease 0.65s both;
 }

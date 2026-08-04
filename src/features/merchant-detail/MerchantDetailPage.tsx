@@ -121,7 +121,7 @@ export function MerchantDetailPage() {
   }
 
   if (isLoading) {
-    return <EmptyState message="Cargando comercio..." />
+    return <EmptyState message="Cargando comercio..." isLoading />
   }
 
   if (!merchant) {
@@ -163,6 +163,7 @@ export function MerchantDetailPage() {
         {sortedPromotions.map((promotion) => {
           const isFavoriteWallet = Boolean(promotion.wallet && followedWalletSlugs.has(promotion.wallet.slug))
           const dateRange = formatPromotionDateRange(promotion)
+          const highlight = formatPromotionHighlight(promotion)
 
           return (
             <button
@@ -183,7 +184,7 @@ export function MerchantDetailPage() {
                   )}
                   {isFavoriteWallet && <span className={styles.favoriteBadge}>★ Favorita</span>}
                 </span>
-                <span className={styles.promoHighlight}>{formatPromotionHighlight(promotion)}</span>
+                {highlight && <span className={styles.promoHighlight}>{highlight}</span>}
               </div>
               <p className={styles.promoTitle}>{promotion.title}</p>
               <p className={styles.promoMeta}>

@@ -6,6 +6,7 @@
   align-items: flex-end;
   justify-content: center;
   background-color: rgba(26, 21, 35, 0.5);
+  animation: global(fadeIn) 0.2s ease both;
 }
 
 /* Mobile-first: a bottom sheet capped at 3/4 of the viewport height. */
@@ -19,6 +20,7 @@
   background-color: var(--color-surface);
   border-radius: var(--radius) var(--radius) 0 0;
   padding: var(--spacing-4);
+  animation: global(slideUpSheet) 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .header {
@@ -47,6 +49,11 @@
   color: var(--color-text-muted);
   font-size: 1.5rem;
   line-height: 1;
+  transition: background-color 0.15s ease;
+}
+
+.closeButton:hover {
+  background-color: var(--color-border);
 }
 
 .searchInput {
@@ -59,6 +66,13 @@
   border: 1px solid var(--color-border);
   background-color: var(--color-bg);
   color: var(--color-text);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.searchInput:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(126, 20, 255, 0.12);
+  outline: none;
 }
 
 .list {
@@ -79,6 +93,7 @@
   color: var(--color-text);
   font-size: 0.9375rem;
   font-weight: 600;
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 .optionSelected {
@@ -105,5 +120,6 @@
     max-width: 90vw;
     max-height: 70vh;
     border-radius: var(--radius);
+    animation: global(scaleIn) 0.25s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
 }

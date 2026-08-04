@@ -74,7 +74,7 @@ function App() {
   return (
     <BrowserRouter>
       {stage === 'welcome' && <WelcomeScreen onSeeOffers={handleSeeOffers} />}
-      {stage === 'loading' && <EmptyState message="Cargando..." />}
+      {stage === 'loading' && <EmptyState message="Cargando..." isLoading />}
       {stage === 'onboarding' && <OnboardingPage onComplete={handleOnboardingComplete} />}
       {stage === 'app' && identity && preference && (
         <PreferenceProvider value={{ preference, token: identity.token, refresh }}>

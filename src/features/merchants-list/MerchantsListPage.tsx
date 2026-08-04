@@ -3,7 +3,7 @@ import { listPromotionCategories } from '../../api/categories'
 import { searchMerchants } from '../../api/merchants'
 import { savePushSubscription, updateNotificationPreference } from '../../api/preferences'
 import type { Merchant, PromotionCategory } from '../../api/types'
-import { CategoryTabs } from '../../components/CategoryTabs/CategoryTabs'
+import { CategoryTabs, type CategorySelection } from '../../components/CategoryTabs/CategoryTabs'
 import { EmptyState } from '../../components/EmptyState/EmptyState'
 import { usePreference } from '../../context/PreferenceContext'
 import { useDebouncedValue } from '../../hooks/useDebouncedValue'
@@ -17,23 +17,54 @@ const INSTALL_BANNER_DISMISSED_KEY = 'bv_install_banner_dismissed'
 const PAGE_SIZE = 20
 const LOAD_MORE_THRESHOLD_PX = 300
 
+interface CachedListState {
+  search: string
+  selectedFilter: CategorySelection
+  merchants: Merchant[]
+  page: number
+  totalPages: number
+  total: number
+  scrollY: number
+}
+
+// Module-level, not component state — survives MerchantsListPage unmounting
+// when the visitor opens a merchant's detail (or notifications) and comes
+// back, so the search, filter, however many pages were already loaded, and
+// the scroll position are exactly how they left them instead of restarting
+// from page 1. Resets on a full page reload, which is fine: this is about
+// in-app back-navigation, not persisting across sessions.
+let cachedListState: CachedListState | null = null
+
 export function MerchantsListPage() {
   const { preference, token, refresh } = usePreference()
 
-  const [search, setSearch] = useState('')
+  const [search, setSearch] = useState(() => cachedListState?.search ?? '')
   const debouncedSearch = useDebouncedValue(search, 300)
   const [categories, setCategories] = useState<PromotionCategory[]>([])
-  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null)
-  const [onlyPreferred, setOnlyPreferred] = useState(false)
+  // "Mis Preferencias" is selected by default and lives in the same
+  // mutually-exclusive group as "Todos"/the categories — see CategoryTabs.
+  // Not `cachedListState?.selectedFilter ?? 'leading'`: "Todos" is itself
+  // represented as `null`, so `??` couldn't tell a cached "Todos" apart
+  // from no cache at all and silently reverted it to "Mis Preferencias".
+  const [selectedFilter, setSelectedFilter] = useState<CategorySelection>(() =>
+    cachedListState !== null ? cachedListState.selectedFilter : 'leading',
+  )
+  const selectedCategoryId = typeof selectedFilter === 'number' ? selectedFilter : null
+  const onlyPreferred = selectedFilter === 'leading'
   const preferredMerchantIds = preference.merchants.map((merchant) => merchant.id)
 
-  const [merchants, setMerchants] = useState<Merchant[]>([])
-  const [page, setPage] = useState(1)
-  const [totalPages, setTotalPages] = useState(1)
-  const [total, setTotal] = useState(0)
-  const [isLoading, setIsLoading] = useState(true)
+  const [merchants, setMerchants] = useState<Merchant[]>(() => cachedListState?.merchants ?? [])
+  const [page, setPage] = useState(() => cachedListState?.page ?? 1)
+  const [totalPages, setTotalPages] = useState(() => cachedListState?.totalPages ?? 1)
+  const [total, setTotal] = useState(() => cachedListState?.total ?? 0)
+  const [isLoading, setIsLoading] = useState(() => cachedListState === null)
   const [isLoadingMore, setIsLoadingMore] = useState(false)
   const isFetchingMoreRef = useRef(false)
+  const latestScrollYRef = useRef(cachedListState?.scrollY ?? 0)
+  // Consumed by the very next fetch effect run only — restored state is
+  // already the result of that same fetch, redoing it would just replace
+  // page 1 with an identical page 1 and throw away pages 2+ already loaded.
+  const skipNextFetchRef = useRef(cachedListState !== null)
 
   const [isBannerDismissed, setIsBannerDismissed] = useState(
     () => localStorage.getItem(NOTIF_BANNER_DISMISSED_KEY) === '1',
@@ -54,6 +85,11 @@ export function MerchantsListPage() {
   }, [])
 
   useEffect(() => {
+    if (skipNextFetchRef.current) {
+      skipNextFetchRef.current = false
+      return
+    }
+
     let cancelled = false
 
     // "Mis Preferencias" with nothing saved yet is a real empty state, not a
@@ -138,6 +174,8 @@ export function MerchantsListPage() {
   // so lazy-loading listens on the window instead of an inner container.
   useEffect(() => {
     function handleWindowScroll() {
+      latestScrollYRef.current = window.scrollY
+
       if (window.innerHeight + window.scrollY >= document.body.offsetHeight - LOAD_MORE_THRESHOLD_PX) {
         loadMore()
       }
@@ -147,6 +185,44 @@ export function MerchantsListPage() {
 
     return () => window.removeEventListener('scroll', handleWindowScroll)
   }, [page, totalPages, debouncedSearch, selectedCategoryId, onlyPreferred])
+
+  // Jumps back to where the visitor was once, right after the restored
+  // merchants (already in `merchants` on the very first render) have
+  // painted — an empty dependency array on purpose, this isn't meant to
+  // re-run on every scroll.
+  useEffect(() => {
+    if (cachedListState && cachedListState.scrollY > 0) {
+      window.scrollTo(0, cachedListState.scrollY)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally mount-only, see comment above.
+  }, [])
+
+  // Keeps the module-level cache current so the next unmount (navigating to
+  // a merchant's detail, or away entirely) always has the latest state to
+  // hand back — writing an object here doesn't itself trigger a re-render.
+  useEffect(() => {
+    cachedListState = {
+      search,
+      selectedFilter,
+      merchants,
+      page,
+      totalPages,
+      total,
+      scrollY: latestScrollYRef.current,
+    }
+  }, [search, selectedFilter, merchants, page, totalPages, total])
+
+  // The sync above only fires when search/filter/results change — if the
+  // visitor just scrolls further and then leaves with no other state
+  // change in between, that scroll wouldn't otherwise reach the cache.
+  // Stamping the true final position on unmount closes that gap.
+  useEffect(() => {
+    return () => {
+      if (cachedListState) {
+        cachedListState = { ...cachedListState, scrollY: latestScrollYRef.current }
+      }
+    }
+  }, [])
 
   async function handleActivateNotifications() {
     setIsActivatingPush(true)
@@ -207,13 +283,9 @@ export function MerchantsListPage() {
 
       <CategoryTabs
         categories={categories}
-        selectedId={selectedCategoryId}
-        onSelect={setSelectedCategoryId}
-        leadingChip={{
-          label: 'Mis Preferencias',
-          active: onlyPreferred,
-          onClick: () => setOnlyPreferred((current) => !current),
-        }}
+        selectedId={selectedFilter}
+        onSelect={setSelectedFilter}
+        leadingChip={{ label: 'Mis Preferencias' }}
         maxVisible={5}
       />
 
@@ -275,7 +347,7 @@ export function MerchantsListPage() {
         </div>
       )}
 
-      {isLoading && <EmptyState message="Cargando comercios..." />}
+      {isLoading && <EmptyState message="Cargando comercios..." isLoading />}
       {!isLoading && merchants.length === 0 && onlyPreferred && preferredMerchantIds.length === 0 && (
         <EmptyState message="Todavía no guardaste comercios. Abrí uno y tocá 'Guardar' para verlo acá." />
       )}

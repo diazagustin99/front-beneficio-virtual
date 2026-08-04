@@ -14,12 +14,22 @@
   text-decoration: none;
   color: inherit;
   cursor: pointer;
-  transition: border-color 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
   overflow: hidden;
+  animation: global(fadeInUp) 0.35s ease both;
 }
 
 .card:hover {
   border-color: var(--color-primary);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 24px rgba(126, 20, 255, 0.14);
+}
+
+.card:active {
+  transform: translateY(-1px) scale(0.98);
 }
 
 .topRow {
