@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { getPreferenceNotifications } from '../../api/preferences'
+import { getUnreadNotificationCount } from '../../api/preferences'
 import { usePreference } from '../../context/PreferenceContext'
 import styles from './Header.module.css'
+
+const UNREAD_COUNT_POLL_MS = 60_000
 
 export function Header() {
   const { token } = usePreference()
@@ -11,16 +13,22 @@ export function Header() {
   useEffect(() => {
     let cancelled = false
 
-    getPreferenceNotifications(token, 1, 100)
-      .then((result) => {
-        if (!cancelled) {
-          setUnreadCount(result.items.filter((notification) => notification.read_at === null).length)
-        }
-      })
-      .catch(() => {})
+    function refreshCount() {
+      getUnreadNotificationCount(token)
+        .then((count) => {
+          if (!cancelled) {
+            setUnreadCount(count)
+          }
+        })
+        .catch(() => {})
+    }
+
+    refreshCount()
+    const interval = setInterval(refreshCount, UNREAD_COUNT_POLL_MS)
 
     return () => {
       cancelled = true
+      clearInterval(interval)
     }
   }, [token])
 

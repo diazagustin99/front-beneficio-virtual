@@ -3,6 +3,7 @@ import { BrowserRouter } from 'react-router-dom'
 import { ApiError } from './api/client'
 import { getPreference } from './api/preferences'
 import type { AppPreference } from './api/types'
+import { BottomNav } from './components/BottomNav/BottomNav'
 import { EmptyState } from './components/EmptyState/EmptyState'
 import { Header } from './components/Header/Header'
 import { PreferenceProvider } from './context/PreferenceContext'
@@ -80,6 +81,7 @@ function App() {
         <PreferenceProvider value={{ preference, token: identity.token, refresh }}>
           <Header />
           <AppRoutes />
+          <BottomNav />
         </PreferenceProvider>
       )}
     </BrowserRouter>

@@ -17,6 +17,11 @@ const WALLET_BRANDING: Record<string, WalletBranding> = {
   macro: { color: '#0039e3', code: 'MA' }, // macro.com.ar primary blue (not red)
   prex: { color: '#7026dc', code: 'PX' }, // prexcard.com.ar primary CTA (violet, not teal)
   icbc: { color: '#c4161c', code: 'IC' }, // icbc.com.ar red — matches the "#C4161C" ICBC itself uses in its own benefits API payload
+  galicia: { color: '#c85000', code: 'GA' }, // galicia.ar production CSS: `.filled{background:#c85000}` (solid CTA button fill, e.g. the buscador-de-promociones page's own WhatsApp CTA), also hardcoded directly in the promotions widget's own CardPromotion component
+  santander: { color: '#ec0000', code: 'SR' }, // santander.com.ar's own benefits micro-frontend bundle: color name map `rojo:"#ec0000"` inside its shared component library, matches the site's own SVG icon fill `rgb(236, 0, 0)` seen on santander.com.ar/personas/beneficios
+  credicoop: { color: '#49B170', code: 'CR' }, // beneficios.bancocredicoop.coop's own CSS (index.css/listado.html), identically defined 3x, explicitly labeled "verde" in the source's own comment ("Coop colores ... Jueves: verde: 49B170") — Credicoop's real logo (bancocredicoop.coop/imagenes/banco-credicoop.jpg) carries this same rainbow palette as its brand stripe, green included
+  banco_ciudad: { color: '#005BAA', code: 'BC' }, // bancociudad.com.ar's own official logo SVG (institucional/resources/img/logo_nuevo.svg) uses exactly two fills, #005BAA and #00AEEF — #005BAA is also the single most-used color (167x) in the institutional site's own production stylesheet (styles_bcba.css), confirming it's the primary brand blue, not the yellow/gold sometimes assumed — no yellow/gold hex appears anywhere in that stylesheet or the logo
+  supervielle: { color: '#EE2527', code: 'SU' }, // supervielle.com.ar's own official favicon (static/favicon.png) is ~97% this single red; the live site's own production stylesheet uses the identical hex for every active/hover UI state (checked radio indicator, active nav item, "here" map badge), and the benefits page's own JS bundle hardcodes this same red as the default card-badge color (`red` token) for the mainstream "Clásico" segment
 }
 
 const DEFAULT_BRANDING: WalletBranding = { color: '#6b6478', code: '??' }

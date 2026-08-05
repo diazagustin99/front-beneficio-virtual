@@ -7,15 +7,32 @@
   animation: global(fadeIn) 0.3s ease both;
 }
 
-.title {
-  font-size: 1.375rem;
-  margin: 0 0 var(--spacing-4);
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  margin-bottom: var(--spacing-4);
 }
 
-.status {
-  padding: var(--spacing-6) var(--spacing-4);
-  text-align: center;
-  color: var(--color-text-muted);
+.backButton {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  min-height: unset;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: var(--color-text);
+  border-radius: 999px;
+  transition: background-color 0.15s ease;
+}
+
+.backButton:hover {
+  background-color: var(--color-bg);
+}
+
+.title {
+  font-size: 1.375rem;
+  margin: 0;
 }
 
 .pushSetting {
@@ -81,20 +98,30 @@
 
 .item {
   display: flex;
-  flex-direction: column;
-  gap: var(--spacing-1);
+  align-items: flex-start;
+  gap: var(--spacing-3);
+  width: 100%;
   padding: var(--spacing-3) var(--spacing-4);
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
   background-color: var(--color-surface);
+  text-align: left;
   animation: global(fadeInUp) 0.3s ease both;
-  transition: border-color 0.15s ease, background-color 0.15s ease, transform 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease,
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 .unread {
   border-color: var(--color-primary);
   background-color: var(--color-bg);
   cursor: pointer;
+}
+
+.unread:hover {
+  box-shadow: 0 4px 14px rgba(126, 20, 255, 0.12);
 }
 
 .unread:active {
@@ -117,16 +144,94 @@
   animation-delay: 0.14s;
 }
 
+.itemIcon {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background-color: var(--color-bg);
+  color: var(--color-primary-dark);
+}
+
+.unread .itemIcon {
+  background-color: var(--color-primary);
+  color: #fff;
+}
+
+.itemBody {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.itemHeadRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-2);
+}
+
 .itemTitle {
   margin: 0;
   font-size: 0.9375rem;
+  font-weight: 600;
   color: var(--color-text);
 }
 
-.itemDate {
-  margin: 0;
-  font-size: 0.8125rem;
+.newBadge {
+  flex-shrink: 0;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: #fff;
+  background-color: var(--color-primary);
+  border-radius: 999px;
+  padding: 0.15rem 0.55rem;
+}
+
+.merchantChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-1);
+}
+
+.merchantChip {
+  font-size: 0.75rem;
   color: var(--color-text-muted);
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  padding: 0.1rem 0.55rem;
+  white-space: nowrap;
+}
+
+.unread .merchantChip {
+  background-color: var(--color-surface);
+}
+
+.itemFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-2);
+  margin-top: var(--spacing-1);
+}
+
+.itemDate {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.itemCount {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-primary-dark);
 }
 
 .loadMoreButton {

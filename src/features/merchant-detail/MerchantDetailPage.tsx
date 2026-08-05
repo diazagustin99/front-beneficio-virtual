@@ -120,12 +120,25 @@ export function MerchantDetailPage() {
     }
   }
 
+  // Always wrapped in `.page` (which carries `flex: 1`), even for these
+  // early returns — otherwise, while loading or on a failed fetch, this
+  // page's content is shorter than the flex column's other siblings expect,
+  // and the bottom nav (sticky, last in that column) rides up to sit right
+  // under it instead of staying pinned to the bottom of the screen.
   if (isLoading) {
-    return <EmptyState message="Cargando comercio..." isLoading />
+    return (
+      <main className={styles.page}>
+        <EmptyState message="Cargando comercio..." isLoading />
+      </main>
+    )
   }
 
   if (!merchant) {
-    return <EmptyState message="No pudimos encontrar este comercio." />
+    return (
+      <main className={styles.page}>
+        <EmptyState message="No pudimos encontrar este comercio." />
+      </main>
+    )
   }
 
   return (

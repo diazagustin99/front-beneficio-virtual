@@ -52,6 +52,26 @@ export async function unfollowMerchant(token: string, merchantId: number): Promi
   return response.data
 }
 
+export async function followWallet(token: string, walletId: number): Promise<AppPreference> {
+  const response = await apiClient.request<ApiItemEnvelope<AppPreference>>(
+    `/preferences/${token}/wallets/${walletId}`,
+    undefined,
+    { method: 'POST' },
+  )
+
+  return response.data
+}
+
+export async function unfollowWallet(token: string, walletId: number): Promise<AppPreference> {
+  const response = await apiClient.request<ApiItemEnvelope<AppPreference>>(
+    `/preferences/${token}/wallets/${walletId}`,
+    undefined,
+    { method: 'DELETE' },
+  )
+
+  return response.data
+}
+
 export interface PaginatedNotifications {
   items: AppNotification[]
   currentPage: number
@@ -79,6 +99,18 @@ export async function markNotificationRead(token: string, notificationId: string
   await apiClient.request(`/preferences/${token}/notifications/${notificationId}/read`, undefined, {
     method: 'PATCH',
   })
+}
+
+// A dedicated count endpoint, not `getPreferenceNotifications(...).items.length`
+// — this is polled on an interval for the header badge, and fetching (and
+// parsing) full notification payloads just to count them every tick would
+// be wasteful.
+export async function getUnreadNotificationCount(token: string): Promise<number> {
+  const response = await apiClient.request<ApiItemEnvelope<{ unread_count: number }>>(
+    `/preferences/${token}/notifications/unread-count`,
+  )
+
+  return response.data.unread_count
 }
 
 export interface PushSubscriptionPayload {

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { listPromotionCategories } from '../../api/categories'
 import { searchMerchants } from '../../api/merchants'
 import { savePushSubscription, updateNotificationPreference } from '../../api/preferences'
@@ -61,10 +61,26 @@ export function MerchantsListPage() {
   const [isLoadingMore, setIsLoadingMore] = useState(false)
   const isFetchingMoreRef = useRef(false)
   const latestScrollYRef = useRef(cachedListState?.scrollY ?? 0)
-  // Consumed by the very next fetch effect run only — restored state is
-  // already the result of that same fetch, redoing it would just replace
-  // page 1 with an identical page 1 and throw away pages 2+ already loaded.
-  const skipNextFetchRef = useRef(cachedListState !== null)
+  // The filters `cachedListState` was fetched under, snapshotted once at
+  // mount. The fetch effect skips while the current filters still match
+  // this snapshot — restored state is already the result of that same
+  // fetch, redoing it would replace page 1 with an identical page 1 and
+  // throw away pages 2+ already loaded. Deliberately a value comparison,
+  // not a one-shot "already skipped" flag: React's dev-mode double-invoke
+  // of mount effects (setup → cleanup → setup) would consume a one-shot
+  // flag on its first pass and fetch for real on its second, silently
+  // collapsing the cached list back to page 1. Comparing values instead
+  // makes both passes reach the same (correct) conclusion.
+  const cachedFiltersRef = useRef(
+    cachedListState !== null
+      ? {
+          search: cachedListState.search,
+          selectedCategoryId:
+            typeof cachedListState.selectedFilter === 'number' ? cachedListState.selectedFilter : null,
+          onlyPreferred: cachedListState.selectedFilter === 'leading',
+        }
+      : null,
+  )
 
   const [isBannerDismissed, setIsBannerDismissed] = useState(
     () => localStorage.getItem(NOTIF_BANNER_DISMISSED_KEY) === '1',
@@ -85,10 +101,22 @@ export function MerchantsListPage() {
   }, [])
 
   useEffect(() => {
-    if (skipNextFetchRef.current) {
-      skipNextFetchRef.current = false
+    const cachedFilters = cachedFiltersRef.current
+
+    if (
+      cachedFilters !== null &&
+      cachedFilters.search === debouncedSearch &&
+      cachedFilters.selectedCategoryId === selectedCategoryId &&
+      cachedFilters.onlyPreferred === onlyPreferred
+    ) {
       return
     }
+
+    // Filters diverged from the cache (or there was none) — this snapshot
+    // must never match again for the rest of this mount, otherwise
+    // switching back to the original filter later in the same session
+    // would wrongly skip and leave stale results on screen.
+    cachedFiltersRef.current = null
 
     let cancelled = false
 
@@ -186,14 +214,24 @@ export function MerchantsListPage() {
     return () => window.removeEventListener('scroll', handleWindowScroll)
   }, [page, totalPages, debouncedSearch, selectedCategoryId, onlyPreferred])
 
-  // Jumps back to where the visitor was once, right after the restored
-  // merchants (already in `merchants` on the very first render) have
-  // painted — an empty dependency array on purpose, this isn't meant to
-  // re-run on every scroll.
-  useEffect(() => {
-    if (cachedListState && cachedListState.scrollY > 0) {
-      window.scrollTo(0, cachedListState.scrollY)
+  // Jumps back to where the visitor was. A long restored list (this is
+  // exactly the "scrolled a lot" case) doesn't have its final height yet at
+  // the moment `useLayoutEffect` itself fires — DOM mutations are in, but
+  // the browser hasn't necessarily finished laying them out — so `scrollTo`
+  // would get clamped to whatever shorter height existed at that instant
+  // and never revisited. One `requestAnimationFrame` waits for a real
+  // layout/paint pass first. Empty dependency array on purpose: this isn't
+  // meant to re-run on every scroll, only once for the mount that restored
+  // `cachedListState`.
+  useLayoutEffect(() => {
+    if (!cachedListState || cachedListState.scrollY <= 0) {
+      return
     }
+
+    const targetY = cachedListState.scrollY
+    const frame = requestAnimationFrame(() => window.scrollTo(0, targetY))
+
+    return () => cancelAnimationFrame(frame)
     // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally mount-only, see comment above.
   }, [])
 
@@ -266,8 +304,19 @@ export function MerchantsListPage() {
     setIsInstallBannerDismissed(true)
   }
 
+  function handleScrollToTop() {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   const showNotifBanner = !preference.wants_notifications && !isBannerDismissed
   const showInstallBanner = canInstall && !isInstallBannerDismissed
+  // `page` only advances past 1 once infinite scroll has loaded a further
+  // page — exactly "scrolled far enough that getting back to the top by
+  // hand would be a chore", which is when this button should offer a
+  // shortcut. Guarded by `!isLoading` too: a filter change starts a fresh
+  // fetch (and shows the loading spinner) before `page` itself resets to 1,
+  // so without this the button could flash during that in-between moment.
+  const showScrollToTopButton = !isLoading && page > 1
 
   return (
     <main className={styles.page}>
@@ -365,6 +414,19 @@ export function MerchantsListPage() {
           </div>
           {isLoadingMore && <p className={styles.status}>Cargando más...</p>}
         </>
+      )}
+
+      {showScrollToTopButton && (
+        <button
+          type="button"
+          className={styles.scrollTopButton}
+          onClick={handleScrollToTop}
+          aria-label="Volver arriba"
+        >
+          <svg viewBox="0 0 24 24" width={22} height={22} fill="currentColor" aria-hidden="true">
+            <path d="M12 5a1 1 0 0 1 .7.29l6 6a1 1 0 0 1-1.4 1.42L13 8.41V18a1 1 0 1 1-2 0V8.41l-4.3 4.3a1 1 0 0 1-1.4-1.42l6-6A1 1 0 0 1 12 5Z" />
+          </svg>
+        </button>
       )}
     </main>
   )
