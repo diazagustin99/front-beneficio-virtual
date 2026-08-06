@@ -1,5 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
+import { createPortal } from 'react-dom'
 import type { PromotionCategory } from '../../api/types'
+import { useBodyScrollLock } from '../../hooks/useBodyScrollLock'
+import { useEscapeKey } from '../../hooks/useEscapeKey'
 import styles from './CategoryPickerModal.module.css'
 
 interface CategoryPickerModalProps {
@@ -15,22 +18,8 @@ interface CategoryPickerModalProps {
 export function CategoryPickerModal({ categories, selectedId, onSelect, onClose }: CategoryPickerModalProps) {
   const [search, setSearch] = useState('')
 
-  useEffect(() => {
-    document.body.style.overflow = 'hidden'
-
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') {
-        onClose()
-      }
-    }
-
-    window.addEventListener('keydown', handleKeyDown)
-
-    return () => {
-      document.body.style.overflow = ''
-      window.removeEventListener('keydown', handleKeyDown)
-    }
-  }, [onClose])
+  useBodyScrollLock(true)
+  useEscapeKey(true, onClose)
 
   const filtered = categories.filter((category) => category.name.toLowerCase().includes(search.toLowerCase()))
 
@@ -39,7 +28,12 @@ export function CategoryPickerModal({ categories, selectedId, onSelect, onClose 
     onClose()
   }
 
-  return (
+  // Rendered into `document.body` — see the same comment in
+  // PromotionDetailModal.tsx: mounted in place, this modal would inherit
+  // whatever page it opens on top of, and that page's own root has an
+  // entrance-animation-driven opacity that traps this modal's `z-index`
+  // below the app's bottom nav.
+  return createPortal(
     <div className={styles.backdrop} onClick={onClose}>
       <div
         className={styles.panel}
@@ -85,6 +79,7 @@ export function CategoryPickerModal({ categories, selectedId, onSelect, onClose 
           {filtered.length === 0 && <p className={styles.empty}>No se encontraron categorías.</p>}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }

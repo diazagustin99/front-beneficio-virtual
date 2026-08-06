@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { getPromotion } from '../../api/promotions'
 import type { PromotionDetail } from '../../api/types'
 import { usePreference } from '../../context/PreferenceContext'
+import { useBodyScrollLock } from '../../hooks/useBodyScrollLock'
+import { useEscapeKey } from '../../hooks/useEscapeKey'
 import { formatPromotionDateRange, formatPromotionHighlight } from '../../utils/promotionFormatting'
 import { getWalletBranding } from '../../utils/walletBranding'
 import { MerchantAvatar } from '../MerchantAvatar/MerchantAvatar'
@@ -51,26 +54,8 @@ export function PromotionDetailModal({ promotionId, onClose }: PromotionDetailMo
     }
   }, [promotionId])
 
-  useEffect(() => {
-    if (promotionId === null) {
-      return
-    }
-
-    document.body.style.overflow = 'hidden'
-
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') {
-        onClose()
-      }
-    }
-
-    window.addEventListener('keydown', handleKeyDown)
-
-    return () => {
-      document.body.style.overflow = ''
-      window.removeEventListener('keydown', handleKeyDown)
-    }
-  }, [promotionId, onClose])
+  useBodyScrollLock(promotionId !== null)
+  useEscapeKey(promotionId !== null, onClose)
 
   const { preference } = usePreference()
 
@@ -86,7 +71,16 @@ export function PromotionDetailModal({ promotionId, onClose }: PromotionDetailMo
     detail?.wallet && preference.wallets.some((wallet) => wallet.slug === detail.wallet?.slug),
   )
 
-  return (
+  // Rendered into `document.body` rather than in place: this modal is
+  // mounted deep inside a page whose own root has an entrance `animation`
+  // (see e.g. MerchantDetailPage.module.css `.page`). Any element with a
+  // computed opacity below 1 — which that page root is, for the duration of
+  // its own fade-in — forms its own stacking context, and traps this
+  // modal's `z-index` inside it. That let the app's bottom nav (a sibling
+  // z-indexed element outside that page) paint over the modal's own
+  // buttons. A portal sidesteps the whole ancestor-stacking-context problem
+  // by making `document.body` the modal's only parent.
+  return createPortal(
     <div className={styles.backdrop} onClick={onClose}>
       <div
         className={styles.panel}
@@ -184,6 +178,7 @@ export function PromotionDetailModal({ promotionId, onClose }: PromotionDetailMo
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }
