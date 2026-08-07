@@ -22,6 +22,18 @@ const WALLET_BRANDING: Record<string, WalletBranding> = {
   credicoop: { color: '#49B170', code: 'CR' }, // beneficios.bancocredicoop.coop's own CSS (index.css/listado.html), identically defined 3x, explicitly labeled "verde" in the source's own comment ("Coop colores ... Jueves: verde: 49B170") — Credicoop's real logo (bancocredicoop.coop/imagenes/banco-credicoop.jpg) carries this same rainbow palette as its brand stripe, green included
   banco_ciudad: { color: '#005BAA', code: 'BC' }, // bancociudad.com.ar's own official logo SVG (institucional/resources/img/logo_nuevo.svg) uses exactly two fills, #005BAA and #00AEEF — #005BAA is also the single most-used color (167x) in the institutional site's own production stylesheet (styles_bcba.css), confirming it's the primary brand blue, not the yellow/gold sometimes assumed — no yellow/gold hex appears anywhere in that stylesheet or the logo
   supervielle: { color: '#EE2527', code: 'SU' }, // supervielle.com.ar's own official favicon (static/favicon.png) is ~97% this single red; the live site's own production stylesheet uses the identical hex for every active/hover UI state (checked radio indicator, active nav item, "here" map badge), and the benefits page's own JS bundle hardcodes this same red as the default card-badge color (`red` token) for the mainstream "Clásico" segment
+  // Attribution-only wallets (MODO's own bank-exclusive promos, no scraper
+  // of their own — see back-beneficio-virtual's WalletSeeder). Colors given
+  // directly by the user, not sampled.
+  bbva: { color: '#001391', code: 'BB' },
+  comafi: { color: '#42A905', code: 'CM' },
+  banco_santa_fe: { color: '#0B9042', code: 'SF' },
+  bancor: { color: '#005F5A', code: 'BA' },
+  banco_entre_rios: { color: '#B10F36', code: 'ER' },
+  banco_santa_cruz: { color: '#1861EA', code: 'SC' },
+  banco_san_juan: { color: '#FFB423', code: 'SJ' },
+  banco_corrientes: { color: '#ECAC00', code: 'CO' },
+  yoy: { color: '#FF0059', code: 'YO' },
 }
 
 const DEFAULT_BRANDING: WalletBranding = { color: '#6b6478', code: '??' }
