@@ -19,6 +19,24 @@ export const WEEKDAY_CHIPS: Array<{ day: WeekDay; label: string }> = WEEK_DAYS.m
   label: CHIP_LABELS[day],
 }))
 
+/** 3-letter label per day, for a wider tap target than `WEEKDAY_CHIPS`'
+ * single letters (e.g. the merchant-detail day filter) — not the same
+ * array, since `WeekdayChips`' tiny circles rely on the single-letter one. */
+const SHORT_LABELS: Record<WeekDay, string> = {
+  Lunes: 'Lun',
+  Martes: 'Mar',
+  Miércoles: 'Mié',
+  Jueves: 'Jue',
+  Viernes: 'Vie',
+  Sábado: 'Sáb',
+  Domingo: 'Dom',
+}
+
+export const DAY_FILTER_CHIPS: Array<{ day: WeekDay; label: string }> = WEEK_DAYS.map((day) => ({
+  day,
+  label: SHORT_LABELS[day],
+}))
+
 const ABBREVIATION_TO_DAY: Record<string, WeekDay> = {
   Lu: 'Lunes',
   Ma: 'Martes',

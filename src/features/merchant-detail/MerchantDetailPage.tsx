@@ -4,6 +4,7 @@ import { getMerchant } from '../../api/merchants'
 import { followMerchant, unfollowMerchant } from '../../api/preferences'
 import { listPromotions } from '../../api/promotions'
 import type { Merchant, PromotionListItem } from '../../api/types'
+import { DayFilterChips, type DayFilterSelection } from '../../components/DayFilterChips/DayFilterChips'
 import { EmptyState } from '../../components/EmptyState/EmptyState'
 import { MerchantAvatar } from '../../components/MerchantAvatar/MerchantAvatar'
 import { PromotionDetailModal } from '../../components/PromotionDetailModal/PromotionDetailModal'
@@ -11,6 +12,7 @@ import { WeekdayChips } from '../../components/WeekdayChips/WeekdayChips'
 import { usePreference } from '../../context/PreferenceContext'
 import { formatPromotionDateRange, formatPromotionHighlight } from '../../utils/promotionFormatting'
 import { getWalletBranding } from '../../utils/walletBranding'
+import { resolveActiveWeekDays } from '../../utils/weekDays'
 import styles from './MerchantDetailPage.module.css'
 
 const PROMOTIONS_PER_MERCHANT = 100
@@ -48,6 +50,7 @@ export function MerchantDetailPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [selectedPromotionId, setSelectedPromotionId] = useState<number | null>(null)
   const [isSavingFollow, setIsSavingFollow] = useState(false)
+  const [selectedDay, setSelectedDay] = useState<DayFilterSelection>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -97,6 +100,11 @@ export function MerchantDetailPage() {
     (promotion) => promotion.wallet && followedWalletSlugs.has(promotion.wallet.slug),
   )
   const categoryName = mostFrequentCategoryName(sortedPromotions)
+
+  const dayFilteredPromotions =
+    selectedDay === null
+      ? sortedPromotions
+      : sortedPromotions.filter((promotion) => resolveActiveWeekDays(promotion.valid_days).has(selectedDay))
 
   async function handleToggleFollow() {
     if (!merchant) {
@@ -170,10 +178,16 @@ export function MerchantDetailPage() {
         <p className={styles.highlightBanner}>★ Los descuentos de tus billeteras aparecen primero</p>
       )}
 
+      <DayFilterChips selected={selectedDay} onSelect={setSelectedDay} />
+
       {sortedPromotions.length === 0 && <EmptyState message="Este comercio no tiene descuentos activos ahora." />}
 
+      {sortedPromotions.length > 0 && dayFilteredPromotions.length === 0 && (
+        <EmptyState message="Este comercio no tiene descuentos ese día." />
+      )}
+
       <div className={styles.promoList}>
-        {sortedPromotions.map((promotion) => {
+        {dayFilteredPromotions.map((promotion) => {
           const isFavoriteWallet = Boolean(promotion.wallet && followedWalletSlugs.has(promotion.wallet.slug))
           const dateRange = formatPromotionDateRange(promotion)
           const highlight = formatPromotionHighlight(promotion)
